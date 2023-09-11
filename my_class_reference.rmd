@@ -34,14 +34,14 @@ setwd("~/code/data_journalism_2023_spring")
 ### How to install and load the tidyverse
 
 ```{r}
-install.packages("tidyverse")
+#install.packages("tidyverse")
 library(tidyverse)
 ```
 
 ### How to read in a CSV file from the Internet
 
 ```{r}
-wes_moore_contributions <- read_csv("https://raw.githubusercontent.com/stephenneukam/CNS_Annapolis/main/Campaign_finance/Moore_ContributionsList.csv")
+wes_moore_contributions <-read_csv("https://raw.githubusercontent.com/stephenneukam/CNS_Annapolis/main/Campaign_finance/Moore_ContributionsList.csv")
 ```
 
 ### How to count rows
@@ -53,5 +53,3 @@ dataframe %>%
   group_by(some_column) %>% 
   summarize(count = n())
 ```
-
-
