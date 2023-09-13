@@ -137,7 +137,7 @@ umd_courses |>
 
 Describe what you think each line of this code is doing below, based on the result:
 
-**Answer**The term shows us the year and the month the starts starts, while the second column shows us how many courses are in each corresponding term. This shows us that typically fall semester has the most courses, while winter courses typically have the least. 
+**Answer**The term shows us the year and the month the term starts, while the second column shows us how many courses are in each corresponding term. This shows us that typically fall semester has the most courses, while winter courses typically have the least. 
 
 ### Task 10: Adding arrange to sort the data
 
