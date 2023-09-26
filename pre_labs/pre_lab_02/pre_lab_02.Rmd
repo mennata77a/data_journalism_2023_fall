@@ -234,7 +234,7 @@ general_22 <- general_22 |>
 
 Describe what you think this code is doing below.
 
-**Answer** This code created a column for each candidate. It also showcased the total number of votes for each and a decimal of how much of the total votes went to Wes Moore.
+**Answer** The code created a single column for the total votes across all candidates, not one for each candidate. It also added a column calculating the pct of votes that Wes Moore got.
 
 ### Task 11: Better percentage calculation
 
@@ -313,7 +313,7 @@ Mutate is even more useful when combined with some additional functions. Let's k
 
 **Task** Run the following code and look at the output. Then write a sentence or two describing what you think the mutate statement is doing step by step.
 
-**Answer** I'm going to be completely, I don't exactly what this code is doing here. I think because of the case_when, the mutate statement makes it so each line checks to see if it can detect the state name in the address column. It also replaces the state name in the address with the acronym. If it can't find a state name in the address, it labels it as NA.
+**Answer** I'm going to be completely, I don't exactly what this code is doing here. I think because of the case_when, the mutate statement makes it so each line checks to see if it can detect the state name in the address column. It populates a new column called state with the state's abbreviation.
 
 ```{r}
 maryland_expenses_with_state <- maryland_expenses |>
@@ -360,6 +360,6 @@ Now that you have seen how to use mutate, filtering and dates, give me three que
 
 1. For the UMD course data, which department offered the most Laws and Ethics courses in 2022?
 
-2. For the Maryland expenditure data, which county had the greatest average number of donations to Wes Moore in 2022?
+2. For the Maryland expenditure data, which county had the greatest average number of spending by Wes Moore in 2022?
 
 3. For the UMD course data, which professor offered the most Laws and Ethics courses across departments in 2022?
