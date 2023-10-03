@@ -287,7 +287,7 @@ from the maryland tourism board -> filter()
 ```{r}
 # cleaning function
 cleaned_md_grants_loans |>
-  filter(source == 'COMMERCE/MARYLAND TOURISM BOARD') |> 
+  filter(str_detect(source, 'MARYLAND TOURISM BOARD')) |> 
   group_by(zip5) |>
   summarise(
     total=sum(amount)

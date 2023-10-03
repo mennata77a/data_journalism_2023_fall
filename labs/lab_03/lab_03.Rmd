@@ -50,12 +50,18 @@ cleaned_md_grants_loans
 
 Q1: You want to know how much money state agencies have paid to the Prince George's County School system, but to do that you'll need to find all of the variations of how the school system might be listed. Write code to find rows where the vendor name contains the county's school system, starting with a broad search and then narrowing it down. When you have found as many as possible, save the result to a new dataframe called `pg_schools`. How many records did you find? Look at & search the records in the dataframe while you construct your code.
 
-A1: I found 46 records.
+A1: I found 87 records.
 
 ```{r}
 # cleaning function
 cleaned_payments |>
-  filter(str_detect(vendor_name, 'PRINCE GEORGES COUNTY PUBLIC SCHOOL') | str_detect(vendor_name, 'PRINCE GEORGES COUNTY SCHOOL') | str_detect(vendor_name,'PG COUNTY PUBLIC SCHOOL')) |>
+  filter(
+    str_detect(vendor_name, 'PRINCE GEORGES COUNTY PUBLIC SCHOOL') | 
+    str_detect(vendor_name, 'PRINCE GEORGES COUNTY SCHOOL') |
+    str_detect(vendor_name,'PG COUNTY PUBLIC SCHOOL') |
+    str_detect(vendor_name,'PRINCE GEORGES PUBLIC') |
+    str_detect(vendor_name,'BD OF EDUCATION OF PG CO') |
+    str_detect(vendor_name,'BOARD OF EDUCATION OF PRINCE GEORGE')) |>
   rename(pg_schools = vendor_name)
 
 ```
@@ -64,10 +70,18 @@ Q2: Using that `pg_schools` dataframe, write code to calculate the total amount 
 
 A2: The fiscal year with the largest total was 2021 with a total of $147,0133,533. The aspect of the result that surprised me the most is the fact that it got rid of every other column. Maybe that's a little silly because these are the functions I used, but it worked out too quickly so I am a little skeptical. Another aspect that stands out to me is that the data for 2011, 2012, 2016, 2017, 2018, 2019, and 2020 are missing. Does this mean that no payments were made in that time? I find that hard to believe.
 
+FIXED THE MISSING YEARS!!!
+
 ```{r}
 # cleaning function
 cleaned_payments |>
-  filter(str_detect(vendor_name, 'PRINCE GEORGES COUNTY PUBLIC SCHOOL') | str_detect(vendor_name, 'PRINCE GEORGES COUNTY SCHOOL') | str_detect(vendor_name,'PG COUNTY PUBLIC SCHOOL')) |>
+filter(
+    str_detect(vendor_name, 'PRINCE GEORGES COUNTY PUBLIC SCHOOL') | 
+    str_detect(vendor_name, 'PRINCE GEORGES COUNTY SCHOOL') |
+    str_detect(vendor_name,'PG COUNTY PUBLIC SCHOOL') |
+    str_detect(vendor_name,'PRINCE GEORGES PUBLIC') |
+    str_detect(vendor_name,'BD OF EDUCATION OF PG CO') |
+    str_detect(vendor_name,'BOARD OF EDUCATION OF PRINCE GEORGE')) |>
   rename(pg_schools = vendor_name) |>
   group_by(fiscal_year) |>
   summarise(
