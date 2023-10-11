@@ -53,3 +53,7 @@ dataframe %>%
   group_by(some_column) %>% 
   summarize(count = n())
 ```
+
+read_csv to bring it in
+
+write_csv to write it out
