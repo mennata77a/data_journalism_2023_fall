@@ -1,0 +1,169 @@
+---
+title: "lab_07"
+author: "derek willis"
+date: "2023-03-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## You will need
+
+-   A Census API key
+
+## Load libraries and establish settings
+
+You'll need to load two packages for this: the tidyverse and tidycensus.
+
+**Task** load these two packages
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load the tidyverse.
+library(tidyverse)
+# if needed, install tidycensus, then load it.
+install.packages("tidycensus")
+library(tidycensus)
+```
+
+## Setup Census API
+
+You'll need your Census API Key:
+
+**Task** set your API Key if you haven't already. You won't need to install or overwrite it.
+
+```{r echo=FALSE}
+census_api_key("ccc0a99ac5ec5f6d3c490a4a8d38de4d555134ad", overwrite=TRUE)
+```
+
+## Load and view ACS variables
+
+You'll also need to load the list of American Community Survey variables from the 2021 5-year estimates so you can identify the codes you need:
+
+**Task** load the variables from the 2021 5-year ACS (which is called "acs5") and save them to a dataframe
+
+```{r}
+acs5 <- load_variables(2021, "acs5", cache = TRUE)
+```
+
+## Answer questions
+
+**Q1** What is the Maryland jurisdiction with the lowest median age, according to the ACS 2021 5-year estimates? You will need to find the variable for median age first. 
+
+**A1** The Maryland jurisdiction with the lowest median age is Balitmore City, according to the the ACS 2021 5-year estimates. The median age is 35.7.
+
+```{r}
+md <- get_acs(geography = "county",
+              variables = c(medinage = "B01002_001"),
+              state = "MD",
+              year = 2021)
+
+md <- md |> arrange(desc(estimate))
+
+md
+```
+
+**Q2** Which Maryland counties have a median age of at least 50? You can use the dataframe you just made to answer this, but you must write code to display only those counties with a median age of at least 50. 
+
+**A2** Talbot County and Worcester County.
+
+```{r}
+md |>
+  filter(estimate >= 50)
+```
+
+**Q3** We're interested in knowing more about Montgomery County zip codes where overdose calls are coming from and the demographic characteristics they possess. In particular, we want to calculate a rate of calls per 1,000 population. To do this, you'll need to:
+
+1. Load the Montgomery County 911 overdose calls data.
+2. Create a new dataframe with the total number of calls for each zip code.
+3. Find the ACS variable pertaining to the total 18 and up population (there are several choices here; you want the simplest one).
+4. Get from the ACS data from all Maryland zip codes using that variable.
+5. Join the ACS data to the Montgomery County zip code totals dataframe and rename the estimate column to a meaningful name you've given the ACS variable.
+6. Add a column to the joined dataframe that calculates a rate of calls per 1,000 population.
+
+Which zip code has the highest rate of calls? Which has the lowest?
+
+I'm not gonna lie I had so much trouble with this question. I was fine until it got to the point where I had to join the two data frames. For some reason nothing was working for me. I asked ChatGPT so many questions, including "how to left_join two data frames in R using the tidyvevrse and tidycensus libraries" and "what is wrong with this code?" after pasting what I  had been working on. Neither of these questions helped gave me results that helped. At first I thought maybe something was wrong with the variable I selected, but after scratching that as well I reached out to my group mates for help. I initially had geography set as "county" rather than "zcta", which Taylor helped me catch and I'm very appreciative for.
+
+**A3** The zipcode with the highest rate of calls is 20889, which seems to be "inf" or infinity. (UPDATE: after looking at the census reporter data I have found that this is a very tiny and underreported part of bethesda with a population of 407, so it is very much likely an outlier). The second highest is 20877 with a rate of 1.77. The lowest, on the other hand, is 20707 with a rate of 0.04. 
+
+```{r}
+# Load the Montgomery County 911 overdose calls data
+
+montgomery_overdoses <- read_csv("data/montgomery_2022_overdoses.csv")
+
+# Create new dataframe with total number of calls for each zip code
+
+moco_calls <- montgomery_overdoses |>
+  mutate(zip = as.character(zip)) |>
+  group_by(zip) |>
+  summarize(moco_calls=n()) |>
+  arrange(desc(moco_calls))
+
+# Find the ACS variable pertaining to the total 18 and up population (there are several choices here; you want the simplest one). Get from the ACS data from all Maryland zip codes using that variable. 
+
+calls_adult <- get_acs(geography="zcta", variables = "B09021_001", year=2021)
+
+# Join the ACS data to the Montgomery County zip code totals dataframe and rename the estimate column to a meaningful name you've given the ACS variable.
+
+mocozip_with_acs <- moco_calls |> left_join(calls_adult, by=c('zip'='GEOID')) |>
+  rename(adult_calls = estimate)
+
+# Add a column to the joined dataframe that calculates a rate of calls per 1,000 population.
+
+mocozip_with_acs |>
+  mutate(calls_per_1000 = (moco_calls/(adult_calls/1000))) |>
+  arrange(desc(calls_per_1000))
+
+```
+
+**Q4** Using [CensusReporter.org](https://censusreporter.org/), examine the zip codes with the highest and lowest rates and compare and contrast their demographic profiles. Is there a story here?
+
+Demographics data for zip codes with lowest rates: 
+
+1. 20707 (Laurel): ~36K population, predominantly Black, mostly adults ages 18-64, 8.4% below the poverty line, $91K median household income, pretty high education levels
+
+2. 20832 (Olney): ~26K population, predominantly Black, mostly adults ages 18-64, 8.4% below the poverty line, $91K median household income, pretty high education levels
+
+3. 20833 (Brooksville): ~8K population, predominantly White, mostly adults ages 18-64, 5.5% below the poverty line, $187K median household income, very high education levels
+
+4. 20854 (Potomac): ~50K population, predominantly White, about half adults ages 18-64, 2.7% below the poverty line, $217K median household income, very high education levels
+
+5. 20815 (Bethesda): ~31K population, predominantly White, about half adults ages 18-64, 3.4% below the poverty line, $175K median household income, very high education levels
+
+Demographics data for zip codes with highest rates: 
+
+1. 20889 (Bethesda): 407 population, predominantly White, all adults ages 18-64, no info on percentage of folks below the poverty line, no info on median household income, pretty high education levels
+
+2. 20877 (Gaitherburg): ~26K population, predominantly Hispanic, mostly ages 18-64, 15.3% below the poverty line, $77K median household income, pretty average education levels
+
+3. 20860 (Sandy Springs): ~2K population, predominantly White, ages scattered across the board, 4.9% below the poverty line, $112K median household income, pretty high education levels
+
+4. 20852 (Rockville): ~48K population, predominantly White, mostly adults ages 18-64, 6.4% below the poverty line, $113K median household income, very high education levels
+
+5. 20874 (Germantown): ~62K population, predominantly White and Hispanic, mostly adults ages 18-64, 7.4% below the poverty line, $103K median household income, very high education levels
+
+**A4** I am a bit confused here with this data. I figured that the differences in rates would be due to disparities in poverty levels or median household incomes, but that doesn't seem to be the case. These zipcodes (both with the highest and lowest rates) seem eerily close to one another. I am now wondering if there's anyway to break up these age groups more because that may be more telling. This does also make me a little less confident that I did this correctly. However, if we're talking about a story here, I guess I would examine how poverty plays a factor in these rates because it does seem like those with higher rates have slightly higher disparities in poverty than their counterparts. 
+
+**Q5** Go back to your joined dataframe from Q3 and add two more columns representing the minimum and maximum populations based on the estimate and margin of error, then calculate per capita rates for each. Do you get the same two zip codes for the highest and lowest as you did before? Does that give you more or less confidence in your answers to Q3?
+
+**A5** I do not get the same two zip codes for the highest and lowest. In fact, in this dataset, the lowest per capita rate entry in this dataset is 20889, which was the highest rate in Q3. This makes me feel a lot less confident in my answers to Q3. Not sure what to change but unsure if it's right now. 
+
+```{r}
+#Go back to your joined dataframe from Q3 and add two more columns representing the minimum and maximum populations based on the estimate and margin of error then calculate per capita rates for each.
+
+mocozip_with_acs |>
+  mutate(
+    min_pop = adult_calls - moe,
+    max_pop = adult_calls + moe) |>
+  mutate(
+    high_per_cap_rate = (adult_calls/max_pop) * 1000,
+    low_per_cap_rate = (adult_calls/min_pop) * 1000
+  ) |>
+  arrange(desc(high_per_cap_rate)) 
+```
+
